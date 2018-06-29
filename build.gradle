@@ -1,0 +1,119 @@
+group 'repository-demo'
+version new Version('1.0.xxx')
+import java.text.SimpleDateFormat
+
+apply plugin: 'java'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenCentral()
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+dependencies {
+    compile 'org.jooq:jooq:3.10.7'
+    compile 'com.google.inject:guice:4.0'
+    compile 'io.vertx:vertx-mysql-postgresql-client:3.5.1'
+    compile 'io.vertx:vertx-redis-client:3.5.1'
+    compile 'io.vertx:vertx-mongo-client:3.5.1'
+
+    compile 'common-repository:common-repository:1.0.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'mysql:mysql-connector-java:5.1.38'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.3.0"
+    }
+}
+
+class Version {
+    String thisVersion
+    Date buildTime
+
+
+    Version(String versionValue) {
+        buildTime = new Date()
+        thisVersion = versionValue.replace('xxx', '0') //getTimestamp())
+    }
+
+
+    String getTimestamp() {
+        def format = new SimpleDateFormat('yyyyMMddHHmmss')
+        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('Asia/Ho_Chi_Minh')));
+        return format.format(buildTime)
+    }
+
+
+    String toString() {
+        thisVersion
+    }
+}
+
+artifactory {
+    contextUrl = "http://localhost:9090/artifactory"
+    publish {
+        repository {
+            repoKey = 'gradle-name-env'
+            username = "userName"
+            password = "passWord"
+            maven = true
+
+        }
+        defaults {
+            publications ('mavenJava')
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'gradle-name'
+            username = "userName"
+            password = "passWord"
+            maven = true
+
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact packageJavadoc
+        }
+    }
+
+}
+javadoc {
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
+
+    options
+            {
+                setMemberLevel JavadocMemberLevel.PUBLIC
+                setAuthor true
+
+                links "https://docs.oracle.com/javase/8/docs/api/"
+            }
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task packageJavadoc(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
