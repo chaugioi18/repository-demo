@@ -16,13 +16,6 @@ task wrapper(type: Wrapper) {
 }
 
 dependencies {
-    compile 'org.jooq:jooq:3.10.7'
-    compile 'com.google.inject:guice:4.0'
-    compile 'io.vertx:vertx-mysql-postgresql-client:3.5.1'
-    compile 'io.vertx:vertx-redis-client:3.5.1'
-    compile 'io.vertx:vertx-mongo-client:3.5.1'
-
-    compile 'common-repository:common-repository:1.0.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
@@ -32,7 +25,6 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'mysql:mysql-connector-java:5.1.38'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.3.0"
     }
 }
